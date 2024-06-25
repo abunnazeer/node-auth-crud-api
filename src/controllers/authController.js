@@ -2,48 +2,60 @@ const User = require("../models/User");
 const generateToken = require("../utils/generateToken");
 
 const registerUser = async (req, res) => {
-  const { username, password, role } = req.body;
-  const userExists = await User.findOne({ username });
+  try {
+    const { email, password, role } = req.body;
 
-  if (userExists) {
-    res.status(400);
-    throw new Error("User already exists");
-  }
+    const emailPrefix = email.split("@")[0];
+    const username = emailPrefix.replace(/[.\-_]/g, "");
 
-  const user = await User.create({
-    username,
-    password,
-    role,
-  });
+    const userExists = await User.findOne({ username });
 
-  if (user) {
-    res.status(201).json({
-      _id: user._id,
-      username: user.username,
-      role: user.role,
-      token: generateToken(user._id),
+    if (userExists) {
+      return res.status(400).json({ message: "User already exists" });
+    }
+
+    const user = await User.create({
+      email,
+      username,
+      password,
+      role,
     });
-  } else {
-    res.status(400);
-    throw new Error("Invalid user data");
+
+    if (user) {
+      res.status(201).json({
+        _id: user._id,
+        username: user.username,
+        role: user.role,
+        token: generateToken(user._id),
+      });
+    } else {
+      res.status(400).json({ message: "Invalid user data" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
 
 const authUser = async (req, res) => {
-  const { username, password } = req.body;
+  try {
+    const { username, password } = req.body;
 
-  const user = await User.findOne({ username });
+    const query = username.includes("@") ? { email: username } : { username };
 
-  if (user && (await user.matchPassword(password))) {
-    res.json({
-      _id: user._id,
-      username: user.username,
-      role: user.role,
-      token: generateToken(user._id),
-    });
-  } else {
-    res.status(401);
-    throw new Error("Invalid username or password");
+    const user = await User.findOne(query);
+
+    if (user && (await user.matchPassword(password))) {
+      res.json({
+        _id: user._id,
+        username: user.username,
+        role: user.role,
+        token: generateToken(user._id),
+      });
+    } else {
+      res.status(401).json({ message: "Invalid username or password" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
 

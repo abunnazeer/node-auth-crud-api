@@ -5,12 +5,13 @@
 1. Clone the repository.
 2. Install dependencies: `npm install`.
 3. Create a `.env` file and add the following variables:
-- PORT
-- DATABASE
-- DATABASE_PASSWORD
-- JWT_SECRET
+    - PORT
+    - DATABASE
+    - DATABASE_PASSWORD
+    - JWT_SECRET
 
 4. Run the server: `npm start`.
+5. Run the server: `npm run dev`.
 
 ## Testing
 

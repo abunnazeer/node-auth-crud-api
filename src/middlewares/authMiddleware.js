@@ -16,14 +16,10 @@ const protect = async (req, res, next) => {
 
       next();
     } catch (error) {
-      res.status(401);
-      throw new Error("Not authorized, token failed");
+      res.status(401).json({ message: "Not authorized, token failed" });
     }
-  }
-
-  if (!token) {
-    res.status(401);
-    throw new Error("Not authorized, no token");
+  } else {
+    res.status(401).json({ message: "Not authorized, no token" });
   }
 };
 
@@ -31,8 +27,7 @@ const admin = (req, res, next) => {
   if (req.user && req.user.role === "admin") {
     next();
   } else {
-    res.status(401);
-    throw new Error("Not authorized as an admin");
+    res.status(401).json({ message: "Not authorized as an admin" });
   }
 };
 
